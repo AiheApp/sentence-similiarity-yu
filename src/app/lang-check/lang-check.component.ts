@@ -9,6 +9,7 @@ import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http'
 export class LangCheckComponent implements OnInit {
   public inputText1 = '';
   public showResult1 = '';
+  public feedback = '';
 
   constructor(protected http: HttpClient) { }
 
@@ -22,6 +23,7 @@ export class LangCheckComponent implements OnInit {
     } else {
       this.showResult1 = 'NG';
     }
+
   }
 
   private async cheSentence(mytext: string): Promise<boolean>{
@@ -31,18 +33,31 @@ export class LangCheckComponent implements OnInit {
     body = body.set('language','en-US');
     body = body.set('disableRules','UPPERCASE_SENTENCE_START');
     body = body.set('enabledOnly','false');
-    let result: any;
     let myheaders = new HttpHeaders({'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'});
-
+    let result: any;
     await this.http.post(url, body, {headers: myheaders})
           .toPromise().then(resp=>{
-              result = resp;
-              console.log(result);
+            result = resp;
     });
     console.log(result.matches);
+    this.feedback = this.showErrorMsgs(result.matches);
     if(result.matches.length !== 0){
       return false;
     }
     return true;
+  }
+
+  private showErrorMsgs(errlist: any): string {
+    let rtStr = '';
+    if(errlist){
+      if(errlist.length){
+        if(errlist.length > 0){
+            for(let i=0; i < errlist.length; i++ ){
+              rtStr += '●' + errlist[i].message + '<br>';
+            }
+        }
+      }
+    }
+    return rtStr;
   }
 }

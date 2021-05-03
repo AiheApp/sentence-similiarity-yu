@@ -1,6 +1,9 @@
 <p>lang-check works!</p>
 <div>
     <input type="text" [(ngModel)]="inputText1" placeholder="Input the answer">
-    <button #btnCk1 (click)="ckStrategy1()">Ckeck</button>
+    <button #btnCk1 (click)="ckStrategy1()">Check</button>
     <label>{{showResult1}}</label>
+</div>
+<div>
+    <label [innerHTML]="feedback"></label>
 </div>
