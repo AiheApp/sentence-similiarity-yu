@@ -1,67 +1,59 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { ParamService } from '../../service/param-service';
+import { Router, ActivatedRoute, ParamMap } from '@angular/router';
+import { RemarkObject } from '../../model/mark-object';
 import * as use from '@tensorflow-models/universal-sentence-encoder';
-import * as tf from '@tensorflow/tfjs';
-import { ParamService } from '../service/param-service';
-import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-lang-check',
-  templateUrl: './lang-check.component.html',
-  styleUrls: ['./lang-check.component.css']
+  selector: 'app-sub-page1',
+  templateUrl: './sub-page1.component.html',
+  styleUrls: ['./sub-page1.component.css']
 })
-export class LangCheckComponent implements OnInit {
+export class SubPage1Component implements OnInit {
   public inputText1 = '';
   public inputText2 = '';
-  public inputText3 = '';
   public showResult1 = '';
   public feedback = '';
-  private sampleSen = '';
-  private markObjSen = '';
+  public arrSentences: Array<string>;
+  public arrRemarkObj: Array<RemarkObject>;
+  public outputText1 = '';
 
-  constructor(protected http: HttpClient, protected router: Router,protected paramSrv: ParamService) { }
+  constructor(protected http: HttpClient,private route: ActivatedRoute,
+    protected paramSrv: ParamService) { }
 
-  ngOnInit(): void {
-    console.log('Start LangCheckComponent');
-  }
+  async ngOnInit() {
+    console.log('Start SubPage1Component');
+    // alert(this.paramSrv.sharedData);
+    //alert(this.route.snapshot.paramMap.get('id'));
+    let str1: string = this.paramSrv.sharedData;
+    let str2: string = this.route.snapshot.paramMap.get('p1');
+    this.arrSentences = str1.split('\n');
 
-  public async ckStrategy1(){
-    if(await this.cheSentence(this.inputText1)){
-      this.showResult1 = 'OK';
-    } else {
-      this.showResult1 = 'NG';
+    this.arrRemarkObj = new Array<RemarkObject>();
+    for(let i=0; i < this.arrSentences.length; i++){
+      let rkObj = new RemarkObject();
+      rkObj.content = this.arrSentences[i];
+      rkObj.grammarChk = await this.cheSentence(rkObj.content);
+      rkObj.similarity = parseFloat(await this.chkSimilarity(rkObj.content,str2)).toFixed(2);
+      this.outputText1 += rkObj.content + ':' + this.ckStrategy1(rkObj.grammarChk,rkObj.similarity) 
+                          + '(' + rkObj.grammarChk + '|' + rkObj.similarity + ')' + '\n';
+      this.arrRemarkObj.push(rkObj);
     }
-    use.load().then(model => {
-      const sentences = [
-        'Hello.',
-        'How are you?'
-      ];
-      model.embed(sentences).then(embeddings => {
-        embeddings.print(true /* verbose */);
-        console.log('*********************');
-        console.log(embeddings);
-
-        let cosine_similarity_matrix = this.cosine_similarity_matrix(embeddings.arraySync());
-        console.log(cosine_similarity_matrix);
-      });
-    });
-
-    
-
-    // const model = tf.sequential();
-    // model.add(tf.layers.dense({units: 1, inputShape: [1]}));
-    // model.compile({loss: 'meanSquaredError', optimizer: 'sgd'});
-    // const xs = tf.tensor2d([1, 2, 3, 4], [4, 1]);
-    // const ys = tf.tensor2d([1, 3, 5, 7], [4, 1]);
-    // model.fit(xs, ys, {epochs: 10}).then(() => {
-    //   console.log(model.predict(tf.tensor2d([5], [1, 1])).toString());
-    // });
   }
 
-  public async ckStrategy2(){
-    this.paramSrv.sharedData = this.inputText2;
-    //this.router.navigate(['/sub-page1',{ id: 'heroId' }]);
-    this.router.navigate(['/sub-page1',{p1: this.inputText3}]);
+  public ckStrategy1(p1:boolean,p2:string){
+    if(p1){
+      let fl = parseFloat(p2);
+      if(!isNaN(fl)){
+        if(fl > 0.8){
+          return 'OK';
+        } else{
+          return 'Judgement';
+        }
+      }
+    }
+    return 'NG'
   }
 
   private async cheSentence(mytext: string): Promise<boolean>{
@@ -97,6 +89,26 @@ export class LangCheckComponent implements OnInit {
       }
     }
     return rtStr;
+  }
+
+  private async chkSimilarity(p1:string,p2:string){
+    let cosine_similarity_matrix;
+    await use.load().then(async (model) => {
+      const sentences = [
+        p1,
+        p2
+      ];
+      await model.embed(sentences).then(embeddings => {
+        embeddings.print(true /* verbose */);
+        console.log('*********************');
+        console.log(embeddings);
+
+        cosine_similarity_matrix = this.cosine_similarity_matrix(embeddings.arraySync());
+        console.log(cosine_similarity_matrix);
+      });
+    });
+
+    return cosine_similarity_matrix[0][1];
   }
 
   private dot(a:any, b:any){

@@ -1,4 +1,5 @@
 <p>lang-check works!</p>
+<div>Part One: Mark one sentence</div>
 <div>
     <input type="text" [(ngModel)]="inputText1" placeholder="Input the answer">
     <button #btnCk1 (click)="ckStrategy1()">Check</button>
@@ -7,3 +8,16 @@
 <div>
     <label [innerHTML]="feedback"></label>
 </div>
+
+<br>
+
+<div>Part Two: Mark Multiple sentences </div>
+<div>Sample Sentence</div>
+<input type="text" [(ngModel)]="inputText3" placeholder="Input the Sample Sentence">
+
+<div>
+    <textarea name="txArea" [(ngModel)]="inputText2" placeholder="Input the answer" cols="40" rows="10"></textarea>
+    <br>
+    <button #btnCk2 (click)="ckStrategy2()">Go to Check</button>
+</div>
+
