@@ -32,13 +32,15 @@ export class SubPage1Component implements OnInit {
 
     this.arrRemarkObj = new Array<RemarkObject>();
     for(let i=0; i < this.arrSentences.length; i++){
-      let rkObj = new RemarkObject();
-      rkObj.content = this.arrSentences[i];
-      rkObj.grammarChk = await this.cheSentence(rkObj.content);
-      rkObj.similarity = parseFloat(await this.chkSimilarity(rkObj.content,str2)).toFixed(2);
-      this.outputText1 += rkObj.content + ':' + this.ckStrategy1(rkObj.grammarChk,rkObj.similarity) 
-                          + '(' + rkObj.grammarChk + '|' + rkObj.similarity + ')' + '\n';
-      this.arrRemarkObj.push(rkObj);
+      if(this.arrSentences[i]){
+        let rkObj = new RemarkObject();
+        rkObj.content = this.arrSentences[i];
+        rkObj.grammarChk = await this.cheSentence(rkObj.content);
+        rkObj.similarity = parseFloat(await this.chkSimilarity(rkObj.content,str2)).toFixed(2);
+        this.outputText1 += rkObj.content + ':' + this.ckStrategy1(rkObj.grammarChk,rkObj.similarity) 
+                            + '(' + rkObj.grammarChk + '|' + rkObj.similarity + ')' + '\n';
+        this.arrRemarkObj.push(rkObj);
+      }
     }
   }
 
