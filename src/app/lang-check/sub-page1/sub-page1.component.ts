@@ -37,8 +37,8 @@ export class SubPage1Component implements OnInit {
         rkObj.content = this.arrSentences[i];
         rkObj.grammarChk = await this.cheSentence(rkObj.content);
         rkObj.similarity = parseFloat(await this.chkSimilarity(rkObj.content,str2)).toFixed(2);
-        this.outputText1 += rkObj.content + ':' + this.ckStrategy1(rkObj.grammarChk,rkObj.similarity) 
-                            + '(' + rkObj.grammarChk + '|' + rkObj.similarity + ')' + '\n';
+        this.outputText1 += rkObj.content + ' : ' + this.ckStrategy1(rkObj.grammarChk,rkObj.similarity) 
+                            + ' (' + rkObj.grammarChk + '|' + rkObj.similarity + ')' + '\n';
         this.arrRemarkObj.push(rkObj);
       }
     }
